@@ -3,7 +3,8 @@
  * Each time we'll get to this screen, it will be because we have selected a ShoppingList object. We will never need to call this screen independently.
  * So, it makes sense that when we create the ItemsScreen widget, we expect a ShoppingList to be passed.
  */ 
-import 'package:flutter/material.dart' show AppBar, BuildContext, Icon, IconButton, Icons, ListTile, ListView, Scaffold, State, StatefulWidget, Text, Widget;
+import 'package:flutter/material.dart' show AppBar, BuildContext, Center, CircularProgressIndicator, FloatingActionButton, Icon, IconButton, Icons, ListTile, ListView, Scaffold, State, StatefulWidget, Text, Widget, showDialog;
+import 'package:shopping/ui/list_item_dialog.dart';
 
 import '../util/dbhelper.dart' show DBHelper;
 import '../models/list_items.dart' show ListItem;
@@ -24,8 +25,16 @@ class ItemsScreen extends StatefulWidget {
 }
 
 class _ItemsScreenState extends State<ItemsScreen> {
-  List<ListItem> items = [];
+  List<ListItem> _items = [];
   DBHelper helper = DBHelper();
+  ListItemDialog dialog = ListItemDialog();
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    showData(widget.shoppingList.id);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,29 +45,61 @@ class _ItemsScreenState extends State<ItemsScreen> {
       appBar: AppBar(
         title: Text(shoppingList.name)
       ),
-      body: ListView.builder(
-        itemCount: items.length,
-        itemBuilder: (BuildContext context, int index) {
-          return ListTile(
-            title: Text(items[index].name),
-            subtitle: Text('Quantity: ${items[index].quantity} - Note: ${items[index].note}'),
-            onTap: () {},
-            trailing: IconButton(
-              icon: Icon(Icons.edit),
-              onPressed: () {},
-            )
-          );
-        },
-      )
+      body: _isLoading
+      ? const Center (
+        child: CircularProgressIndicator()
+        )
+      : ListView.builder(
+          itemCount: _items.length,
+          itemBuilder: (BuildContext context, int index) {
+            return ListTile(
+              title: Text(_items[index].name),
+              subtitle: Text('Quantity: ${_items[index].quantity} - Note: ${_items[index].note}'),
+              onTap: () {},
+              trailing: IconButton(
+                icon: Icon(Icons.edit),
+                onPressed: () async {
+                  final updatedItem = await showDialog <ListItem>(
+                    context: context,
+                    builder: (BuildContext context) => dialog.buildDialog(context, _items[index], false)
+                  );
+                  if (updatedItem != null) {
+                    setState(() {
+                      showData(shoppingList.id);
+                    });
+                  }
+                }
+              )
+            );
+          }
+        ),
+        floatingActionButton: FloatingActionButton(
+          child: Icon(Icons.add),
+          onPressed: () async{
+            final newItem = await showDialog <ListItem>(
+              context: context,
+              builder: (BuildContext context) => dialog.buildDialog(context, ListItem(0, shoppingList.id, '', '', ''), true)
+            );
+            if (newItem != null && mounted) {
+              setState(() {
+                showData(shoppingList.id);
+              });
+            }
+          }
+        ),
     );
   }
 
   Future showData(int idList) async {
     await helper.openDb();
 
-    items = await helper.getItems(idList);
-    setState(() {
-      items = items;
-    });
+    final items = await helper.getItems(idList);
+
+    if(mounted) {
+      setState(() {
+        _items = items;
+        _isLoading = false;
+      });
+    }
   }
 }

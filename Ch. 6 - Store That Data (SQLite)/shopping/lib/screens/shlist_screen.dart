@@ -35,7 +35,7 @@ class _ShListState extends State<ShList> {
       ),
       body: _isLoading
       ? const Center( // If shoppingList is null, it means data is still loading
-          child: CircularProgressIndicator(), // Show a loading spinner
+          child: CircularProgressIndicator() // Show a loading spinner
         )
       : ListView.builder( // Once data is loaded, build the list (or an empty state message)
           itemCount: _shoppingList.length, // Now we know shoppingList is not null
