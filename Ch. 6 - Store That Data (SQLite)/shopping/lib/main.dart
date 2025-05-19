@@ -1,11 +1,12 @@
 // lib/main.dart
 
-import 'package:flutter/material.dart' show AppBar, BuildContext, Center, CircleAvatar, CircularProgressIndicator, ColorScheme, Colors, Icon, IconButton, Icons, ListTile, ListView, MaterialApp, MaterialPageRoute, Navigator, Scaffold, State, StatefulWidget, StatelessWidget, Text, ThemeData, Widget, runApp;
+import 'package:flutter/material.dart' show AppBar, BuildContext, Center, CircleAvatar, CircularProgressIndicator, ColorScheme, Colors, Icon, IconButton, Icons, ListTile, ListView, MaterialApp, MaterialPageRoute, Navigator, Scaffold, State, StatefulWidget, StatelessWidget, Text, ThemeData, Widget, runApp, showDialog;
 
 import './util/dbhelper.dart';
 import './models/list_items.dart';
 import './models/shopping_list.dart';
 import './ui/items_screen.dart';
+import './ui/shopping_list_dialog.dart';
 
 void main() {
   runApp(const MyApp());
@@ -39,9 +40,11 @@ class ShList extends StatefulWidget {
 class _ShListState extends State<ShList> {
   List<ShoppingList>? shoppingList;
   DBHelper helper = DBHelper();
+  ShoppingListDialog? dialog;
 
   @override
   void initState() {
+    dialog = ShoppingListDialog();
     super.initState();
     showData(); // Fetch data when the widget is initialized
   }
@@ -72,7 +75,17 @@ class _ShListState extends State<ShList> {
               },
               trailing: IconButton(
                 icon: Icon(Icons.edit),
-                onPressed: () {},
+                onPressed: () async {
+                  final updatedList = await showDialog <ShoppingList>(
+                    context: context,
+                    builder: (BuildContext context) => dialog!.buildDialog(context, shoppingList![index], false)
+                  );
+                  if (updatedList != null) {
+                    setState(() {
+                      shoppingList![index] = updatedList;
+                    });
+                  }
+                },
               )
             );
           },
