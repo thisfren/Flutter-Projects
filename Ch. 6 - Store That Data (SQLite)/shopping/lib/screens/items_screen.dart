@@ -1,4 +1,4 @@
-// lib/ui/items_screen.dart
+// lib/screens/items_screen.dart
 /*
  * Each time we'll get to this screen, it will be because we have selected a ShoppingList object. We will never need to call this screen independently.
  * So, it makes sense that when we create the ItemsScreen widget, we expect a ShoppingList to be passed.
