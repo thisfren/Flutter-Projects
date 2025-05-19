@@ -1,10 +1,11 @@
 // lib/main.dart
 
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' show AppBar, BuildContext, Center, CircleAvatar, CircularProgressIndicator, ColorScheme, Colors, Icon, IconButton, Icons, ListTile, ListView, MaterialApp, MaterialPageRoute, Navigator, Scaffold, State, StatefulWidget, StatelessWidget, Text, ThemeData, Widget, runApp;
 
 import './util/dbhelper.dart';
 import './models/list_items.dart';
 import './models/shopping_list.dart';
+import './ui/items_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -47,27 +48,35 @@ class _ShListState extends State<ShList> {
 
   @override
   Widget build(BuildContext context) {
-    if (shoppingList == null) { // If shoppingList is null, it means data is still loading
-      return Scaffold(
-        appBar: AppBar(
-          title: const Text('Shopping List'),
-        ),
-        body: const Center(
-          child: CircularProgressIndicator(), // Show a loading spinner
-        ),
-      );
-    }
-
-    return Scaffold( // Once data is loaded, build the list (or an empty state message)
+    return Scaffold(
       appBar: AppBar(
         title: const Text('Shopping List'),
       ),
-      body: ListView.builder(
-        itemCount: shoppingList!.length, // Now we know shoppingList is not null
-        itemBuilder: (BuildContext context, int index) {
-          return ListTile(title: Text(shoppingList![index].name));
-        },
-      ),
+      body: shoppingList == null 
+      ? Center( // If shoppingList is null, it means data is still loading
+          child: CircularProgressIndicator(), // Show a loading spinner
+        )
+      : ListView.builder( // Once data is loaded, build the list (or an empty state message)
+          itemCount: shoppingList!.length, // Now we know shoppingList is not null
+          itemBuilder: (BuildContext context, int index) {
+            return ListTile(
+              title: Text(shoppingList![index].name),
+              leading: CircleAvatar(
+                child: Text(shoppingList![index].priority.toString()) 
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ItemsScreen(shoppingList: shoppingList![index]))
+                );
+              },
+              trailing: IconButton(
+                icon: Icon(Icons.edit),
+                onPressed: () {},
+              )
+            );
+          },
+        ),
     );
   }
 
