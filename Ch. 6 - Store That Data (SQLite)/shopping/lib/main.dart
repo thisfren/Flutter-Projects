@@ -1,6 +1,6 @@
 // lib/main.dart
 
-import 'package:flutter/material.dart' show AppBar, BuildContext, Center, CircleAvatar, CircularProgressIndicator, ColorScheme, Colors, Icon, IconButton, Icons, ListTile, ListView, MaterialApp, MaterialPageRoute, Navigator, Scaffold, State, StatefulWidget, StatelessWidget, Text, ThemeData, Widget, runApp, showDialog;
+import 'package:flutter/material.dart' show AppBar, BuildContext, Center, CircleAvatar, CircularProgressIndicator, ColorScheme, Colors, FloatingActionButton, Icon, IconButton, Icons, ListTile, ListView, MaterialApp, MaterialPageRoute, Navigator, Scaffold, State, StatefulWidget, StatelessWidget, Text, ThemeData, Widget, runApp, showDialog;
 
 import './util/dbhelper.dart';
 import './models/list_items.dart';
@@ -40,17 +40,16 @@ class ShList extends StatefulWidget {
 class _ShListState extends State<ShList> {
   List<ShoppingList>? shoppingList;
   DBHelper helper = DBHelper();
-  ShoppingListDialog? dialog;
+  ShoppingListDialog dialog = ShoppingListDialog();
 
   @override
   void initState() {
-    dialog = ShoppingListDialog();
     super.initState();
-    showData(); // Fetch data when the widget is initialized
   }
 
   @override
   Widget build(BuildContext context) {
+    showData();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Shopping List'),
@@ -78,11 +77,11 @@ class _ShListState extends State<ShList> {
                 onPressed: () async {
                   final updatedList = await showDialog <ShoppingList>(
                     context: context,
-                    builder: (BuildContext context) => dialog!.buildDialog(context, shoppingList![index], false)
+                    builder: (BuildContext context) => dialog.buildDialog(context, shoppingList![index], false)
                   );
                   if (updatedList != null) {
                     setState(() {
-                      shoppingList![index] = updatedList;
+                      // Updated list item
                     });
                   }
                 },
@@ -90,19 +89,33 @@ class _ShListState extends State<ShList> {
             );
           },
         ),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.add),
+        onPressed: () async {
+          final newList = await showDialog <ShoppingList>(
+            context: context,
+            builder: (BuildContext context) => dialog.buildDialog(context, ShoppingList(0, '', 0), true)
+          );
+          if (newList != null) {
+            setState(() {
+              // New list was added
+            });
+          }
+        },
+      ),
     );
   }
 
   Future showData() async {
     await helper.openDb(); // Makes sure the database has been opened before we try to insert data into it
 
+    /* Delete all the test code
     ShoppingList list = ShoppingList(0, 'Bakery', 2);
     int listId = await helper.insertList(list);
 
     ListItem item = ListItem(0, listId, 'Bread', 'note', '1 kg');
     int itemId = await helper.insertItem(item);
-    
-    /* Delete all the test code
+
     print('List ID: ${listId.toString()}');
     print('Item ID: ${itemId.toString()}');
     */
