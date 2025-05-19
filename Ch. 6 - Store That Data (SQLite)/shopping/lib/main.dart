@@ -34,13 +34,41 @@ class ShList extends StatefulWidget {
   State<ShList> createState() => _ShListState();
 }
 
+
 class _ShListState extends State<ShList> {
+  List<ShoppingList>? shoppingList;
   DBHelper helper = DBHelper();
 
   @override
+  void initState() {
+    super.initState();
+    showData(); // Fetch data when the widget is initialized
+  }
+
+  @override
   Widget build(BuildContext context) {
-    showData();
-    return Container();
+    if (shoppingList == null) { // If shoppingList is null, it means data is still loading
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Shopping List'),
+        ),
+        body: const Center(
+          child: CircularProgressIndicator(), // Show a loading spinner
+        ),
+      );
+    }
+
+    return Scaffold( // Once data is loaded, build the list (or an empty state message)
+      appBar: AppBar(
+        title: const Text('Shopping List'),
+      ),
+      body: ListView.builder(
+        itemCount: shoppingList!.length, // Now we know shoppingList is not null
+        itemBuilder: (BuildContext context, int index) {
+          return ListTile(title: Text(shoppingList![index].name));
+        },
+      ),
+    );
   }
 
   Future showData() async {
@@ -51,8 +79,15 @@ class _ShListState extends State<ShList> {
 
     ListItem item = ListItem(0, listId, 'Bread', 'note', '1 kg');
     int itemId = await helper.insertItem(item);
-
+    
+    /* Delete all the test code
     print('List ID: ${listId.toString()}');
     print('Item ID: ${itemId.toString()}');
+    */
+
+    shoppingList = await helper.getLists();
+    setState(() { // Call the setState() method to tell our app that the ShoppingList has changed
+      shoppingList = shoppingList;
+    });
   }
 }

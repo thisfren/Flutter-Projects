@@ -38,8 +38,8 @@ class DBHelper {
   Future testDb() async {
     db = await openDb(); // The first time you call this method, the database is created
 
-    await db?.execute('INSERT INTO lists VALUES (0, "Fruit", 2)');
-    await db?.execute('INSERT INTO items VALUES (0, 0, "Apples", "2 kg", "Better if they are green")');
+    await db!.execute('INSERT INTO lists VALUES (0, "Fruit", 2)');
+    await db!.execute('INSERT INTO items VALUES (0, 0, "Apples", "2 kg", "Better if they are green")');
 
     List lists = await db!.rawQuery('SELECT * FROM lists');
     List items = await db!.rawQuery('SELECT * FROM items');
@@ -66,5 +66,22 @@ class DBHelper {
     );
 
     return id;
+  }
+
+  /*
+  A function that retrieves the content of the lists table in our database.
+  Make sure to call this function only after an await dp.open call to avoid runtime errors
+  */
+  Future<List<ShoppingList>> getLists() async {
+    final List<Map<String, dynamic>> maps = await db!.query('lists');
+
+
+    return List.generate(maps.length, (i) { // The return value here is a List of ShoppingList objects
+        return ShoppingList(maps[i]['id'],
+                            maps[i]['name'],
+                            maps[i]['priority']
+        );
+      }
+    );
   }
 }
