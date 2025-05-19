@@ -24,7 +24,7 @@ class DBHelper {
   }
 
   final int version = 2; // Version of the database, beginning at 1
-  Database? db;
+  late Database db;
 
   /*
   Create a method that will open the database if it exists, or create it if it doesn't.
@@ -32,7 +32,7 @@ class DBHelper {
   Therefore, the function will be asynchronous and return a Future type.
   */
   Future<Database> openDb() async {
-    db ??= await openDatabase(join(await getDatabasesPath(), 'shopping.db'),
+    db = await openDatabase(join(await getDatabasesPath(), 'shopping.db'),
       onCreate: (database, version) { // The onCreate parameter will only be called if the database at the path specified is not found, or the version is different
         database.execute(
           'CREATE TABLE lists(id INTEGER PRIMARY KEY, name TEXT, priority INTEGER)'
@@ -44,24 +44,25 @@ class DBHelper {
         );
       },version: version
     );
-    return db!;
+
+    return db;
   }
 
   Future testDb() async {
     db = await openDb(); // The first time you call this method, the database is created
 
-    await db!.execute('INSERT INTO lists VALUES (0, "Fruit", 2)');
-    await db!.execute('INSERT INTO items VALUES (0, 0, "Apples", "2 kg", "Better if they are green")');
+    await db.execute('INSERT INTO lists VALUES (0, "Fruit", 2)');
+    await db.execute('INSERT INTO items VALUES (0, 0, "Apples", "2 kg", "Better if they are green")');
 
-    List lists = await db!.rawQuery('SELECT * FROM lists');
-    List items = await db!.rawQuery('SELECT * FROM items');
+    List lists = await db.rawQuery('SELECT * FROM lists');
+    List items = await db.rawQuery('SELECT * FROM items');
 
     print(lists[0].toString());
     print(items[0].toString());
   }
 
   Future<int> insertList(ShoppingList list) async {
-    int id = await db!.insert(
+    int id = await db.insert(
       'lists',
       list.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace
@@ -71,7 +72,7 @@ class DBHelper {
   }
 
   Future<int> insertItem(ListItem item) async {
-    int id = await db!.insert(
+    int id = await db.insert(
       'items',
       item.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace
@@ -85,7 +86,7 @@ class DBHelper {
   Make sure to call this function only after an await dp.open call to avoid runtime errors
   */
   Future<List<ShoppingList>> getLists() async {
-    final List<Map<String, dynamic>> maps = await db!.query('lists');
+    final List<Map<String, dynamic>> maps = await db.query('lists');
 
 
     return List.generate(maps.length, (i) { // The return value here is a List of ShoppingList objects
@@ -101,7 +102,7 @@ class DBHelper {
   A method that queries the database in the items table, passing the ID of the ShoppingList that was selected, and returns all the retrieved elements.
   */
   Future<List<ListItem>> getItems(int idList) async {
-    final List<Map<String, dynamic>> maps = await db!.query('items',
+    final List<Map<String, dynamic>> maps = await db.query('items',
                                                     where: 'idList = ?',
                                                     whereArgs: [idList]
                                                   );
@@ -119,11 +120,11 @@ class DBHelper {
 
   Future<int> deleteList(ShoppingList list) async {
     int result;
-    result = await db!.delete('items', // First, delete all items associated with this shopping list
+    result = await db.delete('items', // First, delete all items associated with this shopping list
                         where: 'idList = ?',
                         whereArgs: [list.id]
                       );
-    result = await db!.delete('lists', // Then, delete the shopping list itself
+    result = await db.delete('lists', // Then, delete the shopping list itself
                         where: 'id = ?',
                         whereArgs: [list.id]
                       );

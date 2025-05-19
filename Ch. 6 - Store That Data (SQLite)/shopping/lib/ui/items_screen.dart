@@ -20,32 +20,28 @@ class ItemsScreen extends StatefulWidget {
   });
 
   @override
-  State<ItemsScreen> createState() => _ItemsScreenState(this.shoppingList);
+  State<ItemsScreen> createState() => _ItemsScreenState();
 }
 
 class _ItemsScreenState extends State<ItemsScreen> {
-  final ShoppingList shoppingList;
-  List<ListItem>? items;
+  List<ListItem> items = [];
   DBHelper helper = DBHelper();
-
-
-  _ItemsScreenState(
-    this.shoppingList,
-  );
 
   @override
   Widget build(BuildContext context) {
+    final ShoppingList shoppingList = widget.shoppingList;
     showData(shoppingList.id);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(shoppingList.name)
       ),
       body: ListView.builder(
-        itemCount: (items != null) ? items!.length : 0,
+        itemCount: items.length,
         itemBuilder: (BuildContext context, int index) {
           return ListTile(
-            title: Text(items![index].name),
-            subtitle: Text('Quantity: ${items![index].quantity} - Note: ${items![index].note}'),
+            title: Text(items[index].name),
+            subtitle: Text('Quantity: ${items[index].quantity} - Note: ${items[index].note}'),
             onTap: () {},
             trailing: IconButton(
               icon: Icon(Icons.edit),
