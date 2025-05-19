@@ -10,7 +10,19 @@ import '../models/list_items.dart';
 import '../models/shopping_list.dart';
 
 
+/*
+In Dart and Flutter, there is a feature called "factory constructors" that overrides the default behavior when you call the constructor of a class:
+instead of creating a new instance, the factory constructor only returns an instance of the class.
+*/
 class DBHelper {
+  static final DBHelper _dbHelper = DBHelper._internal();
+
+  DBHelper._internal(); // First, we are creating a private constructor named _internal
+
+  factory DBHelper() { // Then, in the factory constructor, we just return it to the outside caller
+    return _dbHelper;
+  }
+
   final int version = 2; // Version of the database, beginning at 1
   Database? db;
 
@@ -80,6 +92,25 @@ class DBHelper {
         return ShoppingList(maps[i]['id'],
                             maps[i]['name'],
                             maps[i]['priority']
+        );
+      }
+    );
+  }
+
+  /*
+  A method that queries the database in the items table, passing the ID of the ShoppingList that was selected, and returns all the retrieved elements.
+  */
+  Future<List<ListItem>> getItems(int idList) async {
+    final List<Map<String, dynamic>> maps = await db!.query('items',
+                                                  where: 'idList = ?',
+                                                  whereArgs: [idList]);
+    
+    return List.generate(maps.length, (i) {
+        return ListItem(maps[i]['id'],
+                        maps[i]['idList'],
+                        maps[i]['name'],
+                        maps[i]['quantity'],
+                        maps[i]['note']
         );
       }
     );
