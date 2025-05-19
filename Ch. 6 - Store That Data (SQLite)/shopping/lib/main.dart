@@ -1,6 +1,6 @@
 // lib/main.dart
 
-import 'package:flutter/material.dart' show AppBar, BuildContext, Center, CircleAvatar, CircularProgressIndicator, ColorScheme, Colors, Dismissible, FloatingActionButton, Icon, IconButton, Icons, Key, ListTile, ListView, MaterialApp, MaterialPageRoute, Navigator, Scaffold, State, StatefulWidget, StatelessWidget, Text, ThemeData, Widget, runApp, showDialog;
+import 'package:flutter/material.dart' show AppBar, BuildContext, Center, CircleAvatar, CircularProgressIndicator, ColorScheme, Colors, Dismissible, FloatingActionButton, Icon, IconButton, Icons, Key, ListTile, ListView, MaterialApp, MaterialPageRoute, Navigator, Scaffold, ScaffoldMessenger, SnackBar, State, StatefulWidget, StatelessWidget, Text, ThemeData, Widget, runApp, showDialog;
 
 import './util/dbhelper.dart';
 import './models/list_items.dart';
@@ -63,13 +63,19 @@ class _ShListState extends State<ShList> {
           itemCount: _shoppingList.length, // Now we know shoppingList is not null
           itemBuilder: (BuildContext context, int index) {
             return Dismissible(
-              key: Key(_shoppingList[index].name),
+              key: Key(_shoppingList[index].id.toString()),
               onDismissed: (direction) async {
                 String strName = _shoppingList[index].name;
-                await helper.deleteList(_shoppingList![index]);
-                setState(() {
+                await helper.deleteList(_shoppingList[index]);
+                if (context.mounted) {
+                  setState(() {
+                    _shoppingList.removeAt(index);
+                  });
 
-                });
+                  ScaffoldMessenger
+                    .of(context)
+                    .showSnackBar(SnackBar(content: Text('$strName deleted')));
+                }
               },
               child: ListTile(
                 title: Text(_shoppingList[index].name),
