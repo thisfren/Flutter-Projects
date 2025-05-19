@@ -48,6 +48,7 @@ class DBHelper {
     return db;
   }
 
+/*
   Future testDb() async {
     db = await openDb(); // The first time you call this method, the database is created
 
@@ -60,6 +61,7 @@ class DBHelper {
     print(lists[0].toString());
     print(items[0].toString());
   }
+*/
 
   Future<int> insertList(ShoppingList list) async {
     int id = await db.insert(
@@ -128,6 +130,16 @@ class DBHelper {
                         where: 'id = ?',
                         whereArgs: [list.id]
                       );
+
+    return result;
+  }
+
+  Future<int> deleteItem(ListItem item) async {
+    int result;
+    result = await db.delete('items',
+                        where: 'id = ?',
+                        whereArgs: [item.id]
+                        );
 
     return result;
   }

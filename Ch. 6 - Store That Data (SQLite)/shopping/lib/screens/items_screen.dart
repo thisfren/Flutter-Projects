@@ -3,7 +3,7 @@
  * Each time we'll get to this screen, it will be because we have selected a ShoppingList object. We will never need to call this screen independently.
  * So, it makes sense that when we create the ItemsScreen widget, we expect a ShoppingList to be passed.
  */ 
-import 'package:flutter/material.dart' show AppBar, BuildContext, Center, CircularProgressIndicator, FloatingActionButton, Icon, IconButton, Icons, ListTile, ListView, Scaffold, State, StatefulWidget, Text, Widget, showDialog;
+import 'package:flutter/material.dart' show AppBar, BuildContext, Center, CircularProgressIndicator, Dismissible, FloatingActionButton, Icon, IconButton, Icons, Key, ListTile, ListView, Scaffold, ScaffoldMessenger, SnackBar, State, StatefulWidget, Text, Widget, showDialog;
 import 'package:shopping/ui/list_item_dialog.dart';
 
 import '../util/dbhelper.dart' show DBHelper;
@@ -39,7 +39,6 @@ class _ItemsScreenState extends State<ItemsScreen> {
   @override
   Widget build(BuildContext context) {
     final ShoppingList shoppingList = widget.shoppingList;
-    showData(shoppingList.id);
 
     return Scaffold(
       appBar: AppBar(
@@ -52,24 +51,40 @@ class _ItemsScreenState extends State<ItemsScreen> {
       : ListView.builder(
           itemCount: _items.length,
           itemBuilder: (BuildContext context, int index) {
-            return ListTile(
-              title: Text(_items[index].name),
-              subtitle: Text('Quantity: ${_items[index].quantity} - Note: ${_items[index].note}'),
-              onTap: () {},
-              trailing: IconButton(
-                icon: Icon(Icons.edit),
-                onPressed: () async {
-                  final updatedItem = await showDialog <ListItem>(
-                    context: context,
-                    builder: (BuildContext context) => dialog.buildDialog(context, _items[index], false)
-                  );
-                  if (updatedItem != null) {
-                    setState(() {
-                      showData(shoppingList.id);
-                    });
-                  }
+            return Dismissible(
+              key: Key(_items[index].id.toString()),
+              onDismissed: (direction) async {
+                String strName = _items[index].name;
+                await helper.deleteItem(_items[index]);
+                if (context.mounted) {
+                  setState(() {
+                    _items.removeAt(index);
+                  });
+
+                  ScaffoldMessenger
+                    .of(context)
+                    .showSnackBar(SnackBar(content: Text('$strName deleted')));
                 }
-              )
+              },
+              child: ListTile(
+                title: Text(_items[index].name),
+                subtitle: Text('Quantity: ${_items[index].quantity} - Note: ${_items[index].note}'),
+                onTap: () {},
+                trailing: IconButton(
+                  icon: Icon(Icons.edit),
+                  onPressed: () async {
+                    final updatedItem = await showDialog <ListItem>(
+                      context: context,
+                      builder: (BuildContext context) => dialog.buildDialog(context, _items[index], false)
+                    );
+                    if (updatedItem != null) {
+                      setState(() {
+                        showData(shoppingList.id);
+                      });
+                    }
+                  }
+                )
+              ),
             );
           }
         ),
