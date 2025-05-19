@@ -1,6 +1,6 @@
 // lib/main.dart
 
-import 'package:flutter/material.dart' show AppBar, BuildContext, Center, CircleAvatar, CircularProgressIndicator, ColorScheme, Colors, FloatingActionButton, Icon, IconButton, Icons, ListTile, ListView, MaterialApp, MaterialPageRoute, Navigator, Scaffold, State, StatefulWidget, StatelessWidget, Text, ThemeData, Widget, runApp, showDialog;
+import 'package:flutter/material.dart' show AppBar, BuildContext, Center, CircleAvatar, CircularProgressIndicator, ColorScheme, Colors, Dismissible, FloatingActionButton, Icon, IconButton, Icons, Key, ListTile, ListView, MaterialApp, MaterialPageRoute, Navigator, Scaffold, State, StatefulWidget, StatelessWidget, Text, ThemeData, Widget, runApp, showDialog;
 
 import './util/dbhelper.dart';
 import './models/list_items.dart';
@@ -38,54 +38,65 @@ class ShList extends StatefulWidget {
 
 
 class _ShListState extends State<ShList> {
-  List<ShoppingList>? shoppingList;
+  List<ShoppingList> _shoppingList = [];
   DBHelper helper = DBHelper();
   ShoppingListDialog dialog = ShoppingListDialog();
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
+    showData();
   }
 
   @override
   Widget build(BuildContext context) {
-    showData();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Shopping List'),
       ),
-      body: shoppingList == null 
-      ? Center( // If shoppingList is null, it means data is still loading
+      body: _isLoading
+      ? const Center( // If shoppingList is null, it means data is still loading
           child: CircularProgressIndicator(), // Show a loading spinner
         )
       : ListView.builder( // Once data is loaded, build the list (or an empty state message)
-          itemCount: shoppingList!.length, // Now we know shoppingList is not null
+          itemCount: _shoppingList.length, // Now we know shoppingList is not null
           itemBuilder: (BuildContext context, int index) {
-            return ListTile(
-              title: Text(shoppingList![index].name),
-              leading: CircleAvatar(
-                child: Text(shoppingList![index].priority.toString()) 
-              ),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ItemsScreen(shoppingList: shoppingList![index]))
-                );
+            return Dismissible(
+              key: Key(_shoppingList[index].name),
+              onDismissed: (direction) async {
+                String strName = _shoppingList[index].name;
+                await helper.deleteList(_shoppingList![index]);
+                setState(() {
+
+                });
               },
-              trailing: IconButton(
-                icon: Icon(Icons.edit),
-                onPressed: () async {
-                  final updatedList = await showDialog <ShoppingList>(
-                    context: context,
-                    builder: (BuildContext context) => dialog.buildDialog(context, shoppingList![index], false)
+              child: ListTile(
+                title: Text(_shoppingList[index].name),
+                leading: CircleAvatar(
+                  child: Text(_shoppingList[index].priority.toString()) 
+                ),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => ItemsScreen(shoppingList: _shoppingList[index]))
                   );
-                  if (updatedList != null) {
-                    setState(() {
-                      // Updated list item
-                    });
-                  }
                 },
-              )
+                trailing: IconButton(
+                  icon: Icon(Icons.edit),
+                  onPressed: () async {
+                    final updatedList = await showDialog <ShoppingList>(
+                      context: context,
+                      builder: (BuildContext context) => dialog.buildDialog(context, _shoppingList[index], false)
+                    );
+                    if (updatedList != null) {
+                      setState(() {
+                        showData();
+                      });
+                    }
+                  },
+                )
+              ),
             );
           },
         ),
@@ -96,9 +107,9 @@ class _ShListState extends State<ShList> {
             context: context,
             builder: (BuildContext context) => dialog.buildDialog(context, ShoppingList(0, '', 0), true)
           );
-          if (newList != null) {
+          if (newList != null && mounted) {
             setState(() {
-              // New list was added
+              showData();
             });
           }
         },
@@ -120,9 +131,12 @@ class _ShListState extends State<ShList> {
     print('Item ID: ${itemId.toString()}');
     */
 
-    shoppingList = await helper.getLists();
-    setState(() { // Call the setState() method to tell our app that the ShoppingList has changed
-      shoppingList = shoppingList;
-    });
+    final shoppingList = await helper.getLists();
+    if (mounted) { // Check if the widget is still in the tree
+      setState(() { // Call the setState() method to tell our app that the ShoppingList has changed
+        _shoppingList = shoppingList;
+        _isLoading = false;
+      });
+    }
   }
 }

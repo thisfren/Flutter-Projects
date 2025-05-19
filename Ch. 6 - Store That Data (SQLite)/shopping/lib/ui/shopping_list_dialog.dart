@@ -48,13 +48,15 @@ class ShoppingListDialog {
             ),
             ElevatedButton(
               child: Text('Save Shopping List'),
-              onPressed: () {
+              onPressed: () async {
                 list.name = txtName.text;
                 list.priority = int.parse(txtPriority.text);
 
-                helper.insertList(list);
-
-                Navigator.pop(context, list);
+                await helper.insertList(list);
+                
+                if (context.mounted) {
+                  Navigator.pop(context, list);
+                }
               },
             )
           ],

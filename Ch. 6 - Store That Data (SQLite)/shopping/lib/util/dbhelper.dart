@@ -102,8 +102,9 @@ class DBHelper {
   */
   Future<List<ListItem>> getItems(int idList) async {
     final List<Map<String, dynamic>> maps = await db!.query('items',
-                                                  where: 'idList = ?',
-                                                  whereArgs: [idList]);
+                                                    where: 'idList = ?',
+                                                    whereArgs: [idList]
+                                                  );
     
     return List.generate(maps.length, (i) {
         return ListItem(maps[i]['id'],
@@ -114,5 +115,14 @@ class DBHelper {
         );
       }
     );
+  }
+
+  Future<int> deleteList(ShoppingList list) async {
+    int result = await db!.delete('items', 
+                        where: 'idList = ?',
+                        whereArgs: [list.id]
+                      );
+
+    return result;
   }
 }
