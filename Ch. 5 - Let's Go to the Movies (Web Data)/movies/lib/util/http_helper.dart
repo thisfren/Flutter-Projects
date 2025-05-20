@@ -10,24 +10,27 @@ import 'package:http/http.dart' as http show Response, get;
 
 
 class HttpHelper {
-  final String? urlKey = dotenv.env['API_KEY'];
+  final String? apiKey = dotenv.env['API_KEY'];
   final String urlHost = 'api.themoviedb.org';
   final String urlBase = '/3/movie';
-  final String urlUpcoming = '/upcoming?';
-  final String urlLanguage = '&language=en-US';
+  final String urlUpcoming = '/upcoming';
+  final String language = 'en-US';
 
   Future<String?> getUpcoming() async {
-    if (this.urlKey == null) {
+    if (this.apiKey == null) {
       return null;
     }
 
-    final String urlKey = this.urlKey!;
-    final upcoming = Uri(
-      scheme: 'https',
-      host: urlHost,
-      path: urlBase + urlUpcoming + urlKey + urlLanguage
+    final String apiKey = this.apiKey!;
+    final upcoming = Uri.https(
+      urlHost,
+      '$urlBase$urlUpcoming',
+      {
+        'api_key': apiKey,
+        'language': language
+      }
     );
-    
+
     http.Response result = await http.get(upcoming);
 
     if (result.statusCode == HttpStatus.ok) {
