@@ -1,10 +1,16 @@
-import 'package:flutter/material.dart';
+// lib/main.dart
+
+import 'package:flutter/material.dart' show BuildContext, ColorScheme, Colors, MaterialApp, StatelessWidget, ThemeData, Widget, runApp;
 import 'package:flutter_dotenv/flutter_dotenv.dart' show dotenv;
+
+import 'home.dart';
+
 
 Future<void> main() async {
   await dotenv.load(fileName: ".env");
   runApp(const MyMovies());
 }
+
 
 class MyMovies extends StatelessWidget {
   const MyMovies({super.key});
@@ -18,29 +24,6 @@ class MyMovies extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
       ),
       home: const Home(title: 'Home'),
-    );
-  }
-}
-
-class Home extends StatelessWidget {
-  const Home({super.key, required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(title),
-      ),
-      body: Center(
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
