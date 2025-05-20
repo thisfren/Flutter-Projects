@@ -11,7 +11,8 @@ import 'package:http/http.dart' as http show Response, get;
 
 class HttpHelper {
   final String? urlKey = dotenv.env['API_KEY'];
-  final String urlBase = 'https://api.themoviedb.org/3/movie';
+  final String urlHost = 'api.themoviedb.org';
+  final String urlBase = '/3/movie';
   final String urlUpcoming = '/upcoming?';
   final String urlLanguage = '&language=en-US';
 
@@ -21,9 +22,13 @@ class HttpHelper {
     }
 
     final String urlKey = this.urlKey!;
-    final String upcoming = urlBase + urlUpcoming + urlKey + urlLanguage;
+    final upcoming = Uri(
+      scheme: 'https',
+      host: urlHost,
+      path: urlBase + urlUpcoming + urlKey + urlLanguage
+    );
     
-    http.Response result = await http.get(upcoming as Uri);
+    http.Response result = await http.get(upcoming);
 
     if (result.statusCode == HttpStatus.ok) {
       return result.body;

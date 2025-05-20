@@ -23,7 +23,7 @@ class MyMovies extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
       ),
-      home: const Home(title: 'Home'),
+      home: const Home(),
     );
   }
 }

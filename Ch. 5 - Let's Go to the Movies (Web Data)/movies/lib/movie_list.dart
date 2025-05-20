@@ -1,17 +1,46 @@
+// lib/movie_list.dart
+
+import 'package:flutter/material.dart' show AppBar, BuildContext, Container, Scaffold, State, StatefulWidget, Text, Theme, Widget;
+
+import './util/http_helper.dart';
 
 
-import 'package:flutter/material.dart' show BuildContext, Container, State, StatefulWidget, Widget;
-
-class MyWidget extends StatefulWidget {
-  const MyWidget({super.key});
+class MovieList extends StatefulWidget {
+  const MovieList({super.key});
 
   @override
-  State<MyWidget> createState() => _MyWidgetState();
+  State<MovieList> createState() => _MovieListState();
 }
 
-class _MyWidgetState extends State<MyWidget> {
+class _MovieListState extends State<MovieList> {
+  String result = '';
+  late HttpHelper helper;
+
+  @override
+  void initState() {
+    helper = HttpHelper();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container();
+    helper.getUpcoming().then(
+      (value) {
+        setState(() {
+          if (value != null) {
+            result = value;
+          }
+        });
+      }
+    );
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Movies'),
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      ),
+      body: Container(
+        child: Text(result)
+      )
+    );
   }
 }
