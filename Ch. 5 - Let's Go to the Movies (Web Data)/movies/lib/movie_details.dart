@@ -19,9 +19,9 @@ class MovieDetails extends StatelessWidget {
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     String imagePath;
-    imagePath = movie.posterPath.isEmpty
+    imagePath = (movie.posterPath == null || movie.posterPath!.isEmpty)
               ? 'https://images.freeimages.com/images/large-previews/5eb/movie-clapboard-1184339.jpg'
-              : imageBase + movie.posterPath;
+              : imageBase + movie.posterPath!;
               
     return Scaffold(
       appBar: AppBar(

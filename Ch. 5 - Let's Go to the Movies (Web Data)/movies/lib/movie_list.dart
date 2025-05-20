@@ -49,6 +49,19 @@ class _MovieListState extends State<MovieList> {
     }
   }
 
+  Future search(input) async {
+    final movies = await helper.findMovies(input);
+    if (movies == null) {
+      print('didnt find movies');
+      return null;
+    }
+    
+    setState(() {
+      moviesCount = movies.length;
+      this.movies = movies;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     String imagePath;
@@ -66,6 +79,9 @@ class _MovieListState extends State<MovieList> {
                   visibleIcon = Icon(Icons.cancel);
                   searchBar = TextField(
                     textInputAction: TextInputAction.search,
+                    onSubmitted: (String input) {
+                      search(input.trim());
+                    },
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 20
@@ -97,7 +113,7 @@ class _MovieListState extends State<MovieList> {
                     foregroundImage: NetworkImage(imagePath),
                   ),
                   title: Text(movies[index].title),
-                  subtitle: Text('Released: ${movies[index].releaseDate} - Vote: ${movies[index].voteAverage.toString().substring(0,3)}'),
+                  subtitle: Text('Released: ${movies[index].releaseDate ?? 'N/A'} - Vote: ${movies[index].voteAverage != null ? movies[index].voteAverage.toStringAsFixed(1) : 'N/A'}'),
                   onTap: () {
                     MaterialPageRoute route = MaterialPageRoute(
                       builder: (_) => MovieDetails(movie: movies[index])

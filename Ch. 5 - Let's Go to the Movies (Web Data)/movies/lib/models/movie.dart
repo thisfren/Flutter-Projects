@@ -4,7 +4,7 @@ class Movie {
   late double voteAverage;
   late String releaseDate;
   late String overview;
-  late String posterPath;
+  late String? posterPath;
 
   Movie(
     this.id,

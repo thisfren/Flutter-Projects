@@ -24,7 +24,7 @@ class HttpHelper {
       urlSearchBase,
       {
         'api_key': apiKey,
-        'query=': title
+        'query': title
       }
     );
 
