@@ -1,6 +1,6 @@
 // lib/movie_list.dart
 
-import 'package:flutter/material.dart' show AppBar, BuildContext, Card, Center, Colors, EdgeInsets, ListTile, ListView, Padding, Scaffold, State, StatefulWidget, Text, Theme, Widget;
+import 'package:flutter/material.dart' show AppBar, BuildContext, Card, Center, CircleAvatar, Colors, EdgeInsets, ListTile, ListView, NetworkImage, Padding, Scaffold, State, StatefulWidget, Text, Theme, Widget;
 
 import './util/http_helper.dart';
 
@@ -15,6 +15,8 @@ class MovieList extends StatefulWidget {
 class _MovieListState extends State<MovieList> {
   List movies = [];
   int moviesCount = 0;
+  final String imageBase = 'https://image.tmdb.org/t/p/w92/';
+  final String defaultImage = 'https://images.freeimages.com/images/large-previews/5eb/movie-clapboard-1184339.jpg';
   late HttpHelper helper;
 
   @override
@@ -46,6 +48,7 @@ class _MovieListState extends State<MovieList> {
 
   @override
   Widget build(BuildContext context) {
+    String imagePath;
     // Data fetching is now done in _fetchMovies, called from initState.
     return Scaffold(
       appBar: AppBar(
@@ -58,10 +61,16 @@ class _MovieListState extends State<MovieList> {
           child: ListView.builder(
             itemCount: moviesCount,
             itemBuilder: (BuildContext context, int index) {
+              imagePath = movies[index].posterPath == null
+                        ? defaultImage
+                        : imageBase + movies[index].posterPath;
               return Card(
                 color: Colors.white,
                 elevation: 2,
                 child: ListTile(
+                  leading: CircleAvatar(
+                    foregroundImage: NetworkImage(imagePath),
+                  ),
                   title: Text(movies[index].title),
                   subtitle: Text('Released: ${movies[index].releaseDate} - Vote: ${movies[index].voteAverage.toString().substring(0,3)}')
                 )
