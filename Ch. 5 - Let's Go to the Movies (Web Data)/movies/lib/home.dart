@@ -5,7 +5,6 @@ import 'package:movies/movie_list.dart' show MovieList;
 
 
 class Home extends StatelessWidget {
-  
   const Home({
     super.key,
   });

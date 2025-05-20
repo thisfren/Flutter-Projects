@@ -1,8 +1,9 @@
 // lib/movie_list.dart
 
-import 'package:flutter/material.dart' show AppBar, BuildContext, Card, Center, CircleAvatar, Colors, EdgeInsets, ListTile, ListView, NetworkImage, Padding, Scaffold, State, StatefulWidget, Text, Theme, Widget;
+import 'package:flutter/material.dart' show AppBar, BuildContext, Card, Center, CircleAvatar, Colors, EdgeInsets, ListTile, ListView, MaterialPageRoute, Navigator, NetworkImage, Padding, Scaffold, State, StatefulWidget, Text, Theme, Widget;
 
 import './util/http_helper.dart';
+import './movie_details.dart';
 
 
 class MovieList extends StatefulWidget {
@@ -72,7 +73,13 @@ class _MovieListState extends State<MovieList> {
                     foregroundImage: NetworkImage(imagePath),
                   ),
                   title: Text(movies[index].title),
-                  subtitle: Text('Released: ${movies[index].releaseDate} - Vote: ${movies[index].voteAverage.toString().substring(0,3)}')
+                  subtitle: Text('Released: ${movies[index].releaseDate} - Vote: ${movies[index].voteAverage.toString().substring(0,3)}'),
+                  onTap: () {
+                    MaterialPageRoute route = MaterialPageRoute(
+                      builder: (_) => MovieDetails(movie: movies[index])
+                    );
+                    Navigator.push(context, route);
+                  }
                 )
               );
             }
