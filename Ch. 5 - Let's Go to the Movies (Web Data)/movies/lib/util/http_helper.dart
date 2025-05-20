@@ -3,10 +3,13 @@
  * We'll use this create the settings and methods that we'll use to connect to the web service.
  */
 
+import 'dart:convert' show json;
 import 'dart:io' show HttpStatus;
 
 import 'package:flutter_dotenv/flutter_dotenv.dart' show dotenv;
 import 'package:http/http.dart' as http show Response, get;
+
+import '../models/movie.dart' show Movie;
 
 
 class HttpHelper {
@@ -16,7 +19,7 @@ class HttpHelper {
   final String urlUpcoming = '/upcoming';
   final String language = 'en-US';
 
-  Future<String?> getUpcoming() async {
+  Future<List?> getUpcoming() async {
     if (this.apiKey == null) {
       return null;
     }
@@ -34,7 +37,12 @@ class HttpHelper {
     http.Response result = await http.get(upcoming);
 
     if (result.statusCode == HttpStatus.ok) {
-      return result.body;
+      final jsonResponse = json.decode(result.body);
+      final moviesMap = jsonResponse['results'];
+
+      List movies = moviesMap.map((i) => Movie.fromJson(i)).toList();
+
+      return movies;
     } else {
       return null;
     }

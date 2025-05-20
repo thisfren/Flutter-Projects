@@ -1,6 +1,6 @@
 // lib/movie_list.dart
 
-import 'package:flutter/material.dart' show AppBar, BuildContext, Center, EdgeInsets, Padding, Scaffold, State, StatefulWidget, Text, Theme, Widget;
+import 'package:flutter/material.dart' show AppBar, BuildContext, Card, Center, Colors, EdgeInsets, ListTile, ListView, Padding, Scaffold, State, StatefulWidget, Text, Theme, Widget;
 
 import './util/http_helper.dart';
 
@@ -13,7 +13,8 @@ class MovieList extends StatefulWidget {
 }
 
 class _MovieListState extends State<MovieList> {
-  String result = 'Loading movies...'; // Initial text to display
+  List movies = [];
+  int moviesCount = 0;
   late HttpHelper helper;
 
   @override
@@ -25,20 +26,19 @@ class _MovieListState extends State<MovieList> {
 
   Future<void> _fetchMovies() async {
     try {
-      final String? moviesData = await helper.getUpcoming();
+      final List? moviesData = await helper.getUpcoming();
       if (mounted) { // Check if the widget is still in the tree
         setState(() {
           if (moviesData != null && moviesData.isNotEmpty) {
-            result = moviesData;
-          } else {
-            result = 'No movies found or failed to load data.';
+            movies = moviesData;
+            moviesCount = movies.length;
           }
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          result = 'Error fetching movies: $e';
+          print('error fetching movies');
         });
       }
     }
@@ -55,7 +55,19 @@ class _MovieListState extends State<MovieList> {
       body: Center( // Center the content
         child: Padding(
           padding: const EdgeInsets.all(16.0), // Add some padding
-          child: Text(result),
+          child: ListView.builder(
+            itemCount: moviesCount,
+            itemBuilder: (BuildContext context, int index) {
+              return Card(
+                color: Colors.white,
+                elevation: 2,
+                child: ListTile(
+                  title: Text(movies[index].title),
+                  subtitle: Text('Released: ${movies[index].releaseDate} - Vote: ${movies[index].voteAverage.toString().substring(0,3)}')
+                )
+              );
+            }
+          ),
         ),
       ),
     );
