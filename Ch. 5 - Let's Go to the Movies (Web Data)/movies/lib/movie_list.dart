@@ -1,6 +1,6 @@
 // lib/movie_list.dart
 
-import 'package:flutter/material.dart' show AppBar, BuildContext, Card, Center, CircleAvatar, Colors, EdgeInsets, ListTile, ListView, MaterialPageRoute, Navigator, NetworkImage, Padding, Scaffold, State, StatefulWidget, Text, Theme, Widget;
+import 'package:flutter/material.dart' show AppBar, BuildContext, Card, Center, CircleAvatar, Colors, EdgeInsets, Icon, IconButton, Icons, ListTile, ListView, MaterialPageRoute, Navigator, NetworkImage, Padding, Scaffold, State, StatefulWidget, Text, TextField, TextInputAction, TextStyle, Theme, Widget;
 
 import './util/http_helper.dart';
 import './movie_details.dart';
@@ -14,6 +14,8 @@ class MovieList extends StatefulWidget {
 }
 
 class _MovieListState extends State<MovieList> {
+  Icon visibleIcon = Icon(Icons.search);
+  Widget searchBar = Text('Movies');
   List movies = [];
   int moviesCount = 0;
   final String imageBase = 'https://image.tmdb.org/t/p/w92/';
@@ -53,8 +55,30 @@ class _MovieListState extends State<MovieList> {
     // Data fetching is now done in _fetchMovies, called from initState.
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Movies'), // Use const for better performance
+        title: searchBar,
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        actions: <Widget>[
+          IconButton(
+            icon: visibleIcon,
+            onPressed: () {
+              setState(() {
+                if (visibleIcon.icon == Icons.search) {
+                  visibleIcon = Icon(Icons.cancel);
+                  searchBar = TextField(
+                    textInputAction: TextInputAction.search,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20
+                    )
+                  );
+                } else {
+                  visibleIcon = Icon(Icons.search);
+                  searchBar = Text('Movies');
+                }
+              });
+            },
+          )
+        ]
       ),
       body: Center( // Center the content
         child: Padding(

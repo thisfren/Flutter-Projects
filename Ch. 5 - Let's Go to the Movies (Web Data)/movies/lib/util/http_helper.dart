@@ -15,11 +15,39 @@ import '../models/movie.dart' show Movie;
 class HttpHelper {
   final String? apiKey = dotenv.env['API_KEY'];
   final String urlHost = 'api.themoviedb.org';
-  final String urlBase = '/3/movie';
-  final String urlUpcoming = '/upcoming';
-  final String language = 'en-US';
+
+
+  Future<List?> findMovies(String title) async {
+    final String urlSearchBase = '/3/search/movie';
+    final query = Uri.https(
+      urlHost,
+      urlSearchBase,
+      {
+        'api_key': apiKey,
+        'query=': title
+      }
+    );
+
+    http.Response result = await http.get(query);
+
+    if (result.statusCode == HttpStatus.ok) {
+      final jsonResponse = json.decode(result.body);
+      final moviesMap = jsonResponse['results'];
+
+      List movies = moviesMap.map((i) => Movie.fromJson(i)).toList();
+
+      return movies;
+    } else {
+      return null;
+    }
+  }
+
 
   Future<List?> getUpcoming() async {
+    final String urlBase = '/3/movie';
+    final String urlUpcoming = '/upcoming';
+    final String language = 'en-US';
+
     if (this.apiKey == null) {
       return null;
     }
